@@ -1,19 +1,22 @@
-#ifndef BS_HEDGING_H
-#define BS_HEDGING_H
+#ifndef BS_HEDGE_H
+#define BS_HEDGE_H
 
 #include <vector>
 #include <string>
 
+// Option types
+enum class OptionType { Call, Put, Straddle };
+
 // Normal CDF approximation
 double norm_cdf(const double x);
 
-// Black-Scholes call price
-double bs_call_price(const double S, const double K, const double T, 
-		     const double r, const double sigma);
+// Black-Scholes price (generalized for call or put)
+double bs_price(const double S, const double K, const double T, 
+		const double r, const double sigma, OptionType type);
 
-// Black-Scholes delta for call
-double bs_call_delta(const double S, const double K, const double T, 
-		     const double r, const double sigma);
+// Black-Scholes delta (generalized for call or put)
+double bs_delta(const double S, const double K, const double T, 
+		const double r, const double sigma, OptionType type);
 
 struct SimulationResult {
 	double mean_profit;
@@ -30,6 +33,7 @@ SimulationResult simulate_hedging(const double S0, const double K, const double 
 				  const double r, const double implied_sigma, 
 				  const double realized_sigma, const double transaction_cost, 
 				  const int num_steps, const int num_paths,
-				  const double premium, const double position);
+				  const double premium, const double position, 
+				  OptionType type);
 
-#endif // BS_HEDGING_H
+#endif // BS_HEDGE_H

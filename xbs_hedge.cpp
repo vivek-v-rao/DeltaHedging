@@ -6,6 +6,15 @@
 
 using namespace std;
 
+string option_type_to_string(OptionType type) {
+	switch (type) {
+		case OptionType::Call: return "Call";
+		case OptionType::Put: return "Put";
+		case OptionType::Straddle: return "Straddle";
+		default: return "Unknown";
+	}
+}
+
 int main() {
 	auto start_time = chrono::high_resolution_clock::now();
 
@@ -13,21 +22,24 @@ int main() {
 	const double K = 100.0;
 	const double T = 1.0;
 	const double r = 0.0;
-	const double implied_sigma = 0.22;
+	const double implied_sigma = 0.25;
 	const double realized_sigma = 0.20;
 	const double transaction_cost = 0.001;
 	const int num_paths = 100000;
-	const vector<int> hedging_frequencies = {0, 1, 4, 12, 52, 252, 504};
+	const vector<int> hedging_frequencies = {0, 1, 4, 12, 52, 252, 504, 756,
+		1008, 2520};
 	const double position = -1.0;
+	const OptionType option_type = OptionType::Straddle; // Change this to Call, Put, or Straddle
 
-	const double bs_price_implied = bs_call_price(S0, K, T, r, implied_sigma);
-	const double bs_price_realized = bs_call_price(S0, K, T, r, realized_sigma);
+	const double bs_price_implied = bs_price(S0, K, T, r, implied_sigma, option_type);
+	const double bs_price_realized = bs_price(S0, K, T, r, realized_sigma, option_type);
 	const double bs_price_diff = bs_price_implied - bs_price_realized;
 	const double expected_profit_no_tcost = bs_price_diff * -position;
 
 	cout << fixed << setprecision(4);
 	cout << "Option Parameters:\n";
 	cout << "-----------------\n";
+	cout << "Option Type:                 " << setw(10) << option_type_to_string(option_type) << "\n";
 	cout << "Option Position:             " << setw(10) << position << "\n";
 	cout << "Initial Stock Price (S0):    " << setw(10) << S0 << "\n";
 	cout << "Strike Price (K):            " << setw(10) << K << "\n";
@@ -48,8 +60,7 @@ int main() {
 
 	for (const int freq : hedging_frequencies) {
 		const SimulationResult result = simulate_hedging(S0, K, T, r, implied_sigma, 
-			realized_sigma, transaction_cost, 
-			freq, num_paths, bs_price_implied, position);
+			realized_sigma, transaction_cost, freq, num_paths, bs_price_implied, position, option_type);
 
 		cout << setw(11) << freq << setw(15) << result.mean_profit 
 				<< setw(12) << result.std_dev_profit << setw(12) << result.mean_to_std_ratio << "\n";
@@ -68,7 +79,7 @@ int main() {
 
 	auto end_time = chrono::high_resolution_clock::now();
 	auto duration = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
-	cout << "\nElapsed Time:" << setw(8) << duration.count() / 1000.0 << " seconds\n";
+	cout << "\nElapsed Time (s):" << setw(10) << duration.count() / 1000.0 << "\n";
 
 	return 0;
 }
