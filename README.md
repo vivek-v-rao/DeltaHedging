@@ -1,5 +1,5 @@
 # DeltaHedging
-Delta hedging of European options in the Black-Scholes framework, with transaction costs and different rebalancing frequencies. Sample output:
+This program simulates delta hedging of European options in the Black-Scholes framework, with transaction costs and different rebalancing frequencies. Hedging more often reduce variance but increases transaction costs. Sample output:
 
 ```
 Option Parameters:
